@@ -2,6 +2,7 @@
 
 ## About
 This is repository for implementing bounding box ensemble method (weighted-boxes-fusion) with multiple detection models (YOLOv4 and YOLOv5)
+
 Also, repo was created for the purpose of participating in the hackathon competition.
 
 ## Configuration
