@@ -16,5 +16,7 @@ Also, repo was created for the purpose of participating in the hackathon competi
 
 ## Reference
 Weighted-boxes-fusion: https://github.com/ZFTurbo/Weighted-Boxes-Fusion
+
 YOLOv4: https://github.com/WongKinYiu/PyTorch_YOLOv4
+
 YOLOv5: https://github.com/ultralytics/yolov5
