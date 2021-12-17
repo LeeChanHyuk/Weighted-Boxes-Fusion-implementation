@@ -63,7 +63,7 @@ put the yolov5 weight in concat/yolov5
    
 
 ## Result
-||Precision|Recall|$mAP_{0.5}$|$mAP_{.5 - .95}$|
+||Precision|Recall|$mAP~0.5~|$mAP~.5 - .95~|
 |---|---|---|---|---|
 |YOLOv4|0.5261|0.8096|0.696|0.5838|
 |YOLOv5|0.6018|0.7129|0.5344|0.6673|
