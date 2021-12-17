@@ -32,17 +32,17 @@ you can organize your dataset folder with this cite (https://github.com/ultralyt
 ## Training 
 ### YOLO V4 Training
 
-"""python
+```python
   cd ROOT/concat/yolov5/yolov4
   python train.py --weights yolov4.weight --data v4_data/custon.yaml
-"""
+```
 
 ### YOLO V5 Training
 
-"""python
+```python
   cd ROOT/concat/yolov5
   python train.py --weights yolov5s.pt --data data/custon.yaml
-"""
+```
 
 ## Result check
 if you want to check my result with hackathon dataset, please follow the below direction.
@@ -56,10 +56,10 @@ and put the yolov4 weight in concat/yolov5/yolov4/weights
 put the yolov5 weight in concat/yolov5
 
 3. implement the test code in yolov5 folder
-   """python
+   ```python
     cd ROOT/concat/yolov5
     python test.py --data your_yamlpath.yaml --yolov4_weight v4_best.pt --yolov5_weight v5_best.pt yolov4_cfg yolov4/cfg/yolov4-pacsp-x.cfg
-   """
+   ```
    
 
 ## Result
