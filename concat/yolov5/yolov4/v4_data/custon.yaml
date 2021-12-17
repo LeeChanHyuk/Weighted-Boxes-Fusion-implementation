@@ -1,0 +1,10 @@
+# train and val datasets (image directory or *.txt file with image paths)
+train: /home/ddl/git/hackathon_project/dataset/train_0.txt  # 118k images
+val: /home/ddl/git/hackathon_project/dataset/valid_0.txt  # 5k images
+test: /home/ddl/git/hackathon_project/dataset/test_0.txt  # 20k images for submission to https://competitions.codalab.org/competitions/20794
+
+# number of classes
+nc: 13
+
+# class names
+names: ['garbage bag', 'banner', 'tent', 'pet', 'Hazard Prevention Facility', 'bench', 'park flowerpot', 'trash can', 'rest area', 'toliet', 'zeolite', 'Street lamp', 'park guide sign' ]
