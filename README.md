@@ -5,6 +5,12 @@ This is repository for implementing bounding box ensemble method (weighted-boxes
 
 Also, repo was created for the purpose of participating in the hackathon competition.
 
+## Install libraries
+
+```python
+  pip install -r requirements.txt
+```
+
 ## directory structure
 Weighted-Boxes-Fusion-implementation
   - additional_utils
