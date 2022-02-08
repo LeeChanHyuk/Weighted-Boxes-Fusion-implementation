@@ -1,5 +1,4 @@
 # Weighted-Boxes-Fusion-implementation
-If this repo was helpful, please click star :)
 
 ## About
 This is repository for implementing bounding box ensemble method (weighted-boxes-fusion) with multiple detection models (YOLOv4 and YOLOv5)
@@ -82,3 +81,5 @@ Weighted-boxes-fusion: https://github.com/ZFTurbo/Weighted-Boxes-Fusion
 YOLOv4: https://github.com/WongKinYiu/PyTorch_YOLOv4
 
 YOLOv5: https://github.com/ultralytics/yolov5
+
+## If this repo was helpful, please click star :)
