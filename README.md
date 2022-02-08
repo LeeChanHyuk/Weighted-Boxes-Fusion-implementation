@@ -1,4 +1,5 @@
 # Weighted-Boxes-Fusion-implementation
+If this repo was helpful, please click star :)
 
 ## About
 This is repository for implementing bounding box ensemble method (weighted-boxes-fusion) with multiple detection models (YOLOv4 and YOLOv5)
