@@ -1,9 +1,13 @@
 # Weighted-Boxes-Fusion-implementation
 
 ## About
-This is repository for implementing bounding box ensemble method (weighted-boxes-fusion) with multiple detection models (YOLOv4 and YOLOv5)
+This is repository for implementing bounding box ensemble method (weighted-boxes-fusion) with multiple detection models (YOLOv4 and YOLOv5).
+The overall process for using weighted-boxes-fusion method is described in below section.
+If you have an issue of using my code, please make issue on my repo.
+**If my repo could help you, your one star can help me a lot. Thanks**
 
-Also, repo was created for the purpose of participating in the hackathon competition.
+And note that this repo was created for the purpose of participating in the hackathon competition.
+(Competition info: Illegal object detection part from Busan metropolitan City artificial intelligence model competition)
 
 ## Install libraries
 
@@ -14,22 +18,23 @@ Also, repo was created for the purpose of participating in the hackathon competi
 ## directory structure
 Weighted-Boxes-Fusion-implementation
   - additional_utils
-  - concat (main folder)
-    - yolov5 (yolov5 model)
+  - model
+    - yolov5 (Example model 1)
       - data (data.yaml folder)
       - models
-      - yolov4 (yolo v4 model)
-        - cfg
-        - models 
-        - v4_data
-        - v4_utils
-        - weights
       - WBF
       - utils
+    - yolov4 (Example model 2)
+      - cfg
+      - models 
+      - v4_data
+      - v4_utils
+      - weights
   - dataset (dataset folder. You must fill in this directory with your dataset)
     - annotations
     - images
     - labels
+    - yaml
 
 ## Make your dataset
 
@@ -39,14 +44,14 @@ you can organize your dataset folder with this cite (https://github.com/ultralyt
 ### YOLO V4 Training
 
 ```python
-  cd ROOT/concat/yolov5/yolov4
+  cd ROOT/model/yolov4 # ROOT is the root directory of your project
   python train.py --weights yolov4.weight --data v4_data/custon.yaml
 ```
 
 ### YOLO V5 Training
 
 ```python
-  cd ROOT/concat/yolov5
+  cd ROOT/model/yolov5
   python train.py --weights yolov5s.pt --data data/custon.yaml
 ```
 
@@ -58,12 +63,12 @@ if you want to check my result with hackathon dataset, please follow the below d
   - yolov4 (https://drive.google.com/file/d/1XBls41JzDdbUC5SvPbUoahCXZ-KyLR-w/view?usp=sharing)
   - yolov5 (https://drive.google.com/file/d/1QhExYLCD8Wc4sf7XvWcIdy1zIK2B2j3k/view?usp=sharing)
 
-and put the yolov4 weight in concat/yolov5/yolov4/weights
-put the yolov5 weight in concat/yolov5
+and put the yolov4 weight in ROOT/model/yolov4/weights
+put the yolov5 weight in ROOT/model/yolov5
 
 3. implement the test code in yolov5 folder
    ```python
-    cd ROOT/concat/yolov5
+    cd ROOT
     python test.py --data your_yamlpath.yaml --yolov4_weight v4_best.pt --yolov5_weight v5_best.pt yolov4_cfg yolov4/cfg/yolov4-pacsp-x.cfg
    ```
    
