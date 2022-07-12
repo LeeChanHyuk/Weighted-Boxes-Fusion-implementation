@@ -23,6 +23,7 @@ And note that this repo was created for the purpose of participating in the hack
 ## (Optional) Import virtual conda virtual environment (Recommended in Linux)
 
 ```python
+  cd ROOT
   conda env create -f test_env.yaml
 ```
 
@@ -45,7 +46,7 @@ Weighted-Boxes-Fusion-implementation
     - annotations
     - images
     - labels
-    - yaml
+    - dataset_yaml
   - configuration.yaml (If you want to use your models, please change the configuration.yaml with below recommendation.)
 
 ## Make your dataset
