@@ -1,0 +1,16 @@
+###############################
+####2022.07.12. ChanHyukLee####
+###############################
+dataset:
+  configuration_path: dataset
+  configuration_name: custon.yaml
+model1:
+  weight_folder_path: model/yolov5 # from ROOT folder
+  weight_file_name: v5_best.pt
+  cfg_file: 0
+model2:
+  weight_folder_path: model/yolov4/weights # from ROOT folder
+  weight_file_name: v4_best.pt
+  cfg_file: 1
+  cfg_folder_path: model/yolov4/cfg # from ROOT folder
+  cfg_file_name: yolov4-pacsp-x.cfg

@@ -1,7 +1,6 @@
 # YOLOv5 🚀 by Ultralytics, GPL-3.0 license
 """
 Validate a trained YOLOv5 model accuracy on a custom dataset
-
 Usage:
     $ python path/to/val.py --data coco128.yaml --weights yolov5s.pt --img 640
 """
@@ -19,7 +18,6 @@ from tqdm import tqdm
 
 FILE = Path(__file__).resolve()
 ROOT = FILE.parents[0]  # YOLOv5 root directory
-
 
 if str(ROOT) not in sys.path:
     sys.path.append(str(ROOT))  # add ROOT to PATH
@@ -43,17 +41,8 @@ from model.yolov5.utils.general import *
 
 from model.yolov5.WBF.examples.example import example_wbf_2_models, example_wbf_1_model
 from model.yolov4.models.models import *
-import yaml
-
-
 FILE = Path(__file__).resolve()
 ROOT = FILE.parents[0]
-
-def parse_yaml(file_path, encoding="utf-8"):
-    assert os.path.isfile(file_path) 
-    with open(file_path, "r", encoding=encoding) as f:
-        dict_yaml = yaml.load(f, Loader=yaml.FullLoader)
-        return dict_yaml
 
 def save_one_txt(predn, save_conf, shape, file):
     # Save one txt result
@@ -123,9 +112,9 @@ def run(data,
         exist_ok=False,  # existing project/name ok, do not increment
         half=True,  # use FP16 half-precision inference
         dnn=False,  # use OpenCV DNN for ONNX inference
-        model2_weight = ROOT /'model/yolov4/weights/v4_best.pt',
-        model2_cfg = ROOT / 'model/yolov4/cfg/yolov4-pacsp-x.cfg',
-        model1_weight = ROOT / 'model/yolov5/v5_best.pt',
+        yolov4_weight = ROOT /'model/yolov4/weights/v4_best.pt',
+        yolov4_cfg = ROOT / 'model/yolov4/cfg/yolov4-pacsp-x.cfg',
+        yolov5_weight = ROOT / 'model/yolov5/v5_best.pt',
         model=None,
         dataloader=None,
         save_dir=Path(''),
@@ -133,22 +122,9 @@ def run(data,
         callbacks=Callbacks(),
         compute_loss=None,
         ):
-    test_configuration = parse_yaml(ROOT/'configuration.yaml')
-    data = os.path.join(test_configuration['dataset']['configuration_path'], test_configuration['dataset']['configuration_name'])
-
-    model1_weight_path = os.path.join(test_configuration['model1']['weight_folder_path'], test_configuration['model1']['weight_file_name'])
-    if test_configuration['model1']['cfg_file']:
-        model1_cfg_path = os.path.join(test_configuration['model1']['cfg_folder_path'], test_configuration['model1']['cfg_file_name'])
-
-    model2_weight_path = os.path.join(test_configuration['model2']['weight_folder_path'], test_configuration['model2']['weight_file_name'])
-    if test_configuration['model2']['cfg_file']:
-        model2_cfg_path = os.path.join(test_configuration['model2']['cfg_folder_path'], test_configuration['model2']['cfg_file_name'])
-    
     # Initialize/load model and set device
-    if opt.data != 'default':
-        data = str(opt.data)
-    if opt.model1_weight != 'default':
-        model1_weights_path = str(opt.model1_weight)
+    data = str(opt.data)
+    weights = str(opt.yolov5_weight)
 
     training = model is not None
     if training:  # called by train.py
@@ -164,16 +140,15 @@ def run(data,
         (save_dir / 'labels' if save_txt else save_dir).mkdir(parents=True, exist_ok=True)  # make dir
 
 
-        # Load VOLOv5 model (Model 1)
-        #v5_model = DetectMultiBackend(weights, device=device, dnn=dnn)
-        model1 = DetectMultiBackend(model1_weight_path, device=device, dnn=dnn)
-        stride, pt, jit, engine = model1.stride, model1.pt, model1.jit, model1.engine
+        # Load VOLOv5 model
+        v5_model = DetectMultiBackend(weights, device=device, dnn=dnn)
+        stride, pt, jit, engine = v5_model.stride, v5_model.pt, v5_model.jit, v5_model.engine
         imgsz = check_img_size(imgsz, s=stride)  # check image size
         half &= (pt or jit or engine) and device.type != 'cpu'  # half precision only supported by PyTorch on CUDA
         if pt or jit:
-            model1.model.half() if half else model1.model.float()
+            v5_model.model.half() if half else v5_model.model.float()
         elif engine:
-            batch_size = model1.batch_size
+            batch_size = v5_model.batch_size
         else:
             half = False
             batch_size = 1  # export.py models default to batch-size 1
@@ -181,22 +156,20 @@ def run(data,
             LOGGER.info(f'Forcing --batch-size 1 square inference shape(1,3,{imgsz},{imgsz}) for non-PyTorch backends')
 
         # Load VOLOv4 model
-        if opt.model2_cfg != 'default':
-            model2_cfg_path = str(opt.model2_cfg)
-        if opt.model2_weight != 'default':
-            model2_weight_path = str(opt.model2_weight)
-        model2 = Darknet(model2_cfg_path, imgsz).cuda()
-        model2.load_state_dict(torch.load(model2_weight_path, map_location=device)['model'])
-        model2.to(device).eval()
+        cfg = str(opt.yolov4_cfg)
+        v4_weights = str(opt.yolov4_weight)
+        v4_model = Darknet(cfg, imgsz).cuda()
+        v4_model.load_state_dict(torch.load(v4_weights, map_location=device)['model'])
+        v4_model.to(device).eval()
         if half:
-            model2.half()  # to FP16
+            v4_model.half()  # to FP16
 
         # Data
         data = check(data)  # check
 
     # Configure
-    model1.eval()
-    model2.eval()
+    v5_model.eval()
+    v4_model.eval()
     is_coco = isinstance(data.get('val'), str) and data['val'].endswith('coco/val2017.txt')  # COCO dataset
     nc = 1 if single_cls else int(data['nc'])  # number of classes
     iouv = torch.linspace(0.5, 0.95, 10).to(device)  # iou vector for mAP@0.5:0.95
@@ -204,7 +177,7 @@ def run(data,
 
     # Dataloader
     if not training:
-        model1.warmup(imgsz=(1, 3, imgsz, imgsz), half=half)  # warmup
+        v5_model.warmup(imgsz=(1, 3, imgsz, imgsz), half=half)  # warmup
         pad = 0.0 if task == 'speed' else 0.5
         task = task if task in ('train', 'val', 'test') else 'val'  # path to train/val/test images
         task = 'test'
@@ -213,7 +186,7 @@ def run(data,
 
     seen = 0
     confusion_matrix = ConfusionMatrix(nc=nc)
-    names = {k: v for k, v in enumerate(model1.names if hasattr(model1, 'names') else model1.module.names)}
+    names = {k: v for k, v in enumerate(v5_model.names if hasattr(v5_model, 'names') else v5_model.module.names)}
     class_map = coco80_to_coco91_class() if is_coco else list(range(1000))
     s = ('%20s' + '%11s' * 6) % ('Class', 'Images', 'Labels', 'P', 'R', 'mAP@.5', 'mAP@.5:.95')
     dt, p, r, f1, mp, mr, map50, map = [0.0, 0.0, 0.0], 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
@@ -233,48 +206,48 @@ def run(data,
         dt[0] += t2 - t1
 
         # Inference
-        model1_out = model1(im, augment=augment, val=False)  # inference, loss outputs
-        model2_out = model2(im, augment=opt.augment)[0]
+        v5_out = v5_model(im, augment=augment, val=False)  # inference, loss outputs
+        v4_out = v4_model(im, augment=opt.augment)[0]
         dt[1] += time_sync() - t2
 
         # NMS
         targets[:, 2:] *= torch.Tensor([width, height, width, height]).to(device)  # to pixels
         lb = [targets[targets[:, 0] == i, 1:] for i in range(nb)] if save_hybrid else []  # for autolabelling
         t3 = time_sync()
-        model1_out = non_maximum_suppression(model1_out, conf_thres, iou_thres, labels=lb, multi_label=True, agnostic=single_cls)
-        model2_out = non_maximum_suppression(model2_out, conf_thres, iou_thres, labels=lb, multi_label=True, agnostic=single_cls)
+        v5_out = non_maximum_suppression(v5_out, conf_thres, iou_thres, labels=lb, multi_label=True, agnostic=single_cls)
+        v4_out = non_maximum_suppression(v4_out, conf_thres, iou_thres, labels=lb, multi_label=True, agnostic=single_cls)
         dt[2] += time_sync() - t3
 
         # Metrics
-        for si, (im0, model2_dets, model1_dets) in enumerate(zip(im, model1_out, model2_out)):
+        for si, (im0, v4_dets, v5_dets) in enumerate(zip(im, v5_out, v4_out)):
             im0 = im0.detach().cpu().numpy() * 255
             im0 = im0.transpose((1,2,0)).astype(np.uint8).copy()
             # concat two model's outputs
-            if len(model2_dets):
-                model2_dets[:, :4] = scale_coords(im.shape[2:], model2_dets[:, :4], im0.shape).round()
+            if len(v4_dets):
+                v4_dets[:, :4] = scale_coords(im.shape[2:], v4_dets[:, :4], im0.shape).round()
 
-            if len(model1_dets):
-                model1_dets[:, :4] = scale_coords(im.shape[2:], model1_dets[:, :4], im0.shape).round()
+            if len(v5_dets):
+                v5_dets[:, :4] = scale_coords(im.shape[2:], v5_dets[:, :4], im0.shape).round()
             
             # Flag for indicating detection success
             detect_success = False
             
-            if len(model2_dets)>0 and len(model2_dets)>0:
-                boxes, scores, labels = example_wbf_2_models(model2_dets.detach().cpu().numpy(), model1_dets.detach().cpu().numpy(), im0)
+            if len(v4_dets)>0 and len(v5_dets)>0:
+                boxes, scores, labels = example_wbf_2_models(v4_dets.detach().cpu().numpy(), v5_dets.detach().cpu().numpy(), im0)
                 boxes[:,0], boxes[:,2] = boxes[:,0] * width, boxes[:,2] * width
                 boxes[:,1], boxes[:,3] = boxes[:,1] * height, boxes[:,3] * height
                 for box in boxes:
                     cv2.rectangle(im0, (int(box[0]), int(box[1])), (int(box[2]), int(box[3])), (0,0,255), 3)
                 detect_success = True
-            elif len(model2_dets)>0:
-                boxes, scores, labels = example_wbf_1_model(model2_dets.detach().cpu().numpy(), im0)
+            elif len(v4_dets)>0:
+                boxes, scores, labels = example_wbf_1_model(v4_dets.detach().cpu().numpy(), im0)
                 boxes[:,0], boxes[:,2] = boxes[:,0] * width, boxes[:,2] * width
                 boxes[:,1], boxes[:,3] = boxes[:,1] * height, boxes[:,3] * height
                 for box in boxes:
                     cv2.rectangle(im0, (int(box[0]), int(box[1])), (int(box[2]), int(box[3])), (0,0,255), 3)
                 detect_success = True
-            elif len(model1_dets)>0:
-                boxes, scores, labels = example_wbf_1_model(model1_dets.detach().cpu().numpy(), im0)
+            elif len(v5_dets)>0:
+                boxes, scores, labels = example_wbf_1_model(v5_dets.detach().cpu().numpy(), im0)
                 boxes[:,0], boxes[:,2] = boxes[:,0] * width, boxes[:,2] * width
                 boxes[:,1], boxes[:,3] = boxes[:,1] * height, boxes[:,3] * height
                 for box in boxes:
@@ -389,8 +362,8 @@ def run(data,
 
 def parse_opt():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--data', type=str, default='default', help='dataset.yaml path')
-    parser.add_argument('--weights', nargs='+', type=str, default='default', help='model.pt path(s)')
+    parser.add_argument('--data', type=str, default=ROOT / 'dataset/custon.yaml', help='dataset.yaml path')
+    parser.add_argument('--weights', nargs='+', type=str, default=ROOT / 'model/volov5/yolov5s.pt', help='model.pt path(s)')
     parser.add_argument('--batch-size', type=int, default=32, help='batch size')
     parser.add_argument('--imgsz', '--img', '--img-size', type=int, default=640, help='inference size (pixels)')
     parser.add_argument('--conf-thres', type=float, default=0.001, help='confidence threshold')
@@ -410,11 +383,11 @@ def parse_opt():
     parser.add_argument('--exist-ok', action='store_true', help='existing project/name ok, do not increment')
     parser.add_argument('--half', action='store_true', help='use FP16 half-precision inference')
     parser.add_argument('--dnn', action='store_true', help='use OpenCV DNN for ONNX inference')
-    parser.add_argument('--model2_weight', nargs='+', type=str, default='default')
-    parser.add_argument('--model2_cfg', nargs='+', type=str, default='default')
-    parser.add_argument('--model1_weight', nargs='+', type=str, default='default')
+    parser.add_argument('--yolov4_weight', nargs='+', type=str, default=ROOT/'model/yolov4/weights/v4_best.pt')
+    parser.add_argument('--yolov4_cfg', nargs='+', type=str, default=ROOT/'model/yolov4/cfg/yolov4-pacsp-x.cfg')
+    parser.add_argument('--yolov5_weight', nargs='+', type=str, default=ROOT/'model/yolov5/v5_best.pt')
     opt = parser.parse_args()
-    #opt.data = check_yaml(opt.data)  # check YAML
+    opt.data = check_yaml(opt.data)  # check YAML
     opt.save_json |= opt.data.endswith('coco.yaml')
     opt.save_txt |= opt.save_hybrid
     print_args(FILE.stem, opt)
