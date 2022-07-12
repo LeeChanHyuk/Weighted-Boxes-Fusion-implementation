@@ -1,6 +1,6 @@
 # Weighted-Boxes-Fusion-implementation
 
-# Weighted-Boxes-Fusion ?
+## Weighted-Boxes-Fusion ?
   **WBF (Weighted-Boxes-Fusion) is the method combining predictions of object detection models.**
   *Original paper: Weighted boxes fusion: Ensembling boxes from different object detection models (Image and Vision Computing, 2021)*
 
