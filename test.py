@@ -18,12 +18,14 @@ import torch
 from tqdm import tqdm
 
 FILE = Path(__file__).resolve()
-ROOT = FILE.parents[0]  # YOLOv5 root directory
+ROOT = FILE.parents[0]  
 
 
 if str(ROOT) not in sys.path:
     sys.path.append(str(ROOT))  # add ROOT to PATH
 ROOT = Path(os.path.relpath(ROOT, Path.cwd()))  # relative
+
+# For using yolov5 libraries
 sys.path.append('/home/ddl/git/WBF/Weighted-Boxes-Fusion-implementation2/model/yolov5')
 from model.yolov5.models.common import DetectMultiBackend
 from model.yolov5.utils.callbacks import Callbacks
@@ -43,8 +45,8 @@ from model.yolov5.utils.general import *
 
 from model.yolov5.WBF.examples.example import example_wbf_2_models, example_wbf_1_model
 from model.yolov4.models.models import *
-import yaml
 
+import yaml
 
 FILE = Path(__file__).resolve()
 ROOT = FILE.parents[0]
@@ -54,6 +56,7 @@ def parse_yaml(file_path, encoding="utf-8"):
     with open(file_path, "r", encoding=encoding) as f:
         dict_yaml = yaml.load(f, Loader=yaml.FullLoader)
         return dict_yaml
+
 
 def save_one_txt(predn, save_conf, shape, file):
     # Save one txt result
@@ -123,9 +126,9 @@ def run(data,
         exist_ok=False,  # existing project/name ok, do not increment
         half=True,  # use FP16 half-precision inference
         dnn=False,  # use OpenCV DNN for ONNX inference
-        model2_weight = ROOT /'model/yolov4/weights/v4_best.pt',
-        model2_cfg = ROOT / 'model/yolov4/cfg/yolov4-pacsp-x.cfg',
-        model1_weight = ROOT / 'model/yolov5/v5_best.pt',
+        model2_weight = 'default',
+        model2_cfg = 'default',
+        model1_weight = 'default',
         model=None,
         dataloader=None,
         save_dir=Path(''),
@@ -435,13 +438,11 @@ def main(opt):
         weights = opt.weights if isinstance(opt.weights, list) else [opt.weights]
         opt.half = True  # FP16 for fastest results
         if opt.task == 'speed':  # speed benchmarks
-            # python val.py --task speed --data coco.yaml --batch 1 --weights yolov5n.pt yolov5s.pt...
             opt.conf_thres, opt.iou_thres, opt.save_json = 0.25, 0.45, False
             for opt.weights in weights:
                 run(**vars(opt), plots=False)
 
         elif opt.task == 'study':  # speed vs mAP benchmarks
-            # python val.py --task study --data coco.yaml --iou 0.7 --weights yolov5n.pt yolov5s.pt...
             for opt.weights in weights:
                 f = f'study_{Path(opt.data).stem}_{Path(opt.weights).stem}.txt'  # filename to save to
                 x, y = list(range(256, 1536 + 128, 128)), []  # x axis (image sizes), y axis
