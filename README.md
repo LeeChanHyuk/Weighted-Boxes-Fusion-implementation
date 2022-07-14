@@ -78,7 +78,7 @@ In configuration.yaml, you must change the path and name of your models and data
 Or you can test your model with command line like below command with your model and dataset path.
 
 ```python
-    python test.py --data your_yamlpath.yaml --model2_weight weight_path_of_model2 --model1_weight weight_path_of_model1 --model2_cfg cfg_path_of_model2
+python test.py --data your_yamlpath.yaml --model2_weight weight_path_of_model2 --model1_weight weight_path_of_model1 --model2_cfg cfg_path_of_model2
 ```
 
 ## Result check with my model
